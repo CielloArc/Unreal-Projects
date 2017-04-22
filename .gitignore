@@ -1,0 +1,14 @@
+##################
+###UNREAL FILES###
+##################
+*/Build
+*/Binaries
+*/DerivedDataCache
+*/Intermediate
+*/Saved
+BuildingEscape/Content/StarterContent/
+
+##############
+###VS FILES###
+##############
+*.VC.db
