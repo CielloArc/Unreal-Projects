@@ -59,7 +59,12 @@ DEFINE_VTABLE_PTR_HELPER_CTOR_CALLER(UOpenDoor); \
 	DEFINE_DEFAULT_CONSTRUCTOR_CALL(UOpenDoor)
 
 
-#define BuildingEscape_Source_BuildingEscape_OpenDoor_h_12_PRIVATE_PROPERTY_OFFSET
+#define BuildingEscape_Source_BuildingEscape_OpenDoor_h_12_PRIVATE_PROPERTY_OFFSET \
+	FORCEINLINE static uint32 __PPO__openAngle() { return STRUCT_OFFSET(UOpenDoor, openAngle); } \
+	FORCEINLINE static uint32 __PPO__pressurePlate() { return STRUCT_OFFSET(UOpenDoor, pressurePlate); } \
+	FORCEINLINE static uint32 __PPO__actorThatOpens() { return STRUCT_OFFSET(UOpenDoor, actorThatOpens); }
+
+
 #define BuildingEscape_Source_BuildingEscape_OpenDoor_h_9_PROLOG
 #define BuildingEscape_Source_BuildingEscape_OpenDoor_h_12_GENERATED_BODY_LEGACY \
 PRAGMA_DISABLE_DEPRECATION_WARNINGS \
