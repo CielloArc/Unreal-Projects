@@ -35,4 +35,14 @@ private:
 
 	//RELEASE THE KRAKEN!
 	void Release();
+
+	void FindPhysicsHandleComponent();
+
+	void SetupInputComponent();
+
+	const FHitResult GetFirstPhysicsBodyInReach();
+
+	FVector GetReachLineEnd();
+
+	FVector GetReachLineStart();
 };

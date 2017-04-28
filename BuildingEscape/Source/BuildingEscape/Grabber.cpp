@@ -21,32 +21,8 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("REPORTANDO"));
-
-	physicsHandler = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-
-	if (physicsHandler)
-	{
-
-	}
-	else 
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s Missing Physics Handle Component"), *GetOwner()->GetName());
-	}
-
-	inputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
-
-	if (inputComponent)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Input Component Found"));
-		inputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
-		inputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s Missing Input Component"), *GetOwner()->GetName());
-	}
-
+	FindPhysicsHandleComponent();
+	SetupInputComponent();
 }
 
 
@@ -55,35 +31,87 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (physicsHandler->GrabbedComponent) 
+	{
+		physicsHandler->SetTargetLocation(GetReachLineEnd());
+	}
+	
+}
+
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab Key Pressed"));
+	auto hitResult = GetFirstPhysicsBodyInReach();
+	auto componentToGrab = hitResult.GetComponent();
+	auto actorHit = hitResult.GetActor();
+
+	if(actorHit)
+	{
+		physicsHandler->GrabComponent(componentToGrab, NAME_None, componentToGrab->GetOwner()->GetActorLocation(), true);
+	}
+
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab Key Release, just like the Kraken"));
+	physicsHandler->ReleaseComponent();
+}
+
+
+void UGrabber::FindPhysicsHandleComponent()
+{
+	physicsHandler = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+
+	if (physicsHandler == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s Missing Physics Handle Component"), *GetOwner()->GetName());
+	}
+}
+
+void UGrabber::SetupInputComponent()
+{
+	inputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+
+	if (inputComponent)
+	{
+		inputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		inputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s Missing Input Component"), *GetOwner()->GetName());
+	}
+}
+
+const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
+{
+	FCollisionQueryParams traceParams(FName(TEXT("")), false, GetOwner());
+
+	//Line Trace
+	FHitResult hitResult;
+	GetWorld()->LineTraceSingleByObjectType(OUT hitResult,GetReachLineStart(), GetReachLineEnd(), FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody), traceParams);
+
+	return hitResult;
+}
+
+FVector UGrabber::GetReachLineEnd()
+{
 	FVector playerViewPointLocation;
 	FRotator playerViewPointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT playerViewPointLocation, OUT playerViewPointRotation);
 
 	FVector lineTraceEnd = playerViewPointLocation + playerViewPointRotation.Vector() * reach;
 
-	DrawDebugLine(GetWorld(), playerViewPointLocation, lineTraceEnd, FColor(255, 0, 0), false, 0.0f, 0.0f, 10.0f);
-
-	//Setup Query Parameters
-	FCollisionQueryParams traceParams(FName(TEXT("")), false, GetOwner());
-
-	//Line Trace
-	FHitResult hit;
-	GetWorld()->LineTraceSingleByObjectType(OUT hit, playerViewPointLocation, lineTraceEnd, FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody), traceParams);
-
-	AActor* actorHit = hit.GetActor();
-	if (actorHit) 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *(actorHit->GetName()));
-	}
+	return lineTraceEnd;
 }
 
-void UGrabber::Grab()
+FVector UGrabber::GetReachLineStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab Key Pressed"));
-}
-
-void UGrabber::Release()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Grab Key Release, just like the Kraken"));
+	FVector playerViewPointLocation;
+	FRotator playerViewPointRotation;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT playerViewPointLocation, OUT playerViewPointRotation);
+	
+	return playerViewPointLocation;
 }
 
