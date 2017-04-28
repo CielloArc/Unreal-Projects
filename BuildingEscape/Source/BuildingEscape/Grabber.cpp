@@ -31,6 +31,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+
+	if (!physicsHandler) { return; }
 	if (physicsHandler->GrabbedComponent) 
 	{
 		physicsHandler->SetTargetLocation(GetReachLineEnd());
@@ -47,6 +49,7 @@ void UGrabber::Grab()
 
 	if(actorHit)
 	{
+		if (!physicsHandler) { return; }
 		physicsHandler->GrabComponent(componentToGrab, NAME_None, componentToGrab->GetOwner()->GetActorLocation(), true);
 	}
 
@@ -55,6 +58,7 @@ void UGrabber::Grab()
 void UGrabber::Release()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Grab Key Release, just like the Kraken"));
+	if (!physicsHandler) { return; }
 	physicsHandler->ReleaseComponent();
 }
 
